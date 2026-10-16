@@ -10,6 +10,7 @@ import { z } from 'zod';
 import type { ServerConfig } from '../utils/types.js';
 import { OpenCodeMCPError, ErrorCodes } from '../utils/types.js';
 import { parseModelString } from '../utils/config.js';
+import { authHeaders, createV2Client, isV2Server } from './opencode-v2.js';
 
 // Re-export types from SDK for convenience
 export type { Session, Agent, Provider } from '@opencode-ai/sdk';
@@ -118,6 +119,14 @@ function extractTextFromParts(parts: unknown[]): string {
 // ============================================================================
 
 export async function createClient(config: ServerConfig): Promise<OpenCodeClient> {
+  const apiVersion = config.apiVersion ?? 'auto';
+  const useV2 = apiVersion === 'v2' ||
+    (apiVersion === 'auto' && await isV2Server(config.serverUrl, authHeaders(config)));
+  console.error(`[createClient] OpenCode API: ${useV2 ? 'v2' : 'v1'} (${apiVersion})`);
+  return useV2 ? createV2Client(config) : createV1Client(config);
+}
+
+async function createV1Client(config: ServerConfig): Promise<OpenCodeClient> {
   // Check for default project directory from env
   const defaultDirectory = process.env.OPENCODE_DEFAULT_PROJECT;
   
@@ -127,6 +136,7 @@ export async function createClient(config: ServerConfig): Promise<OpenCodeClient
   const client = createOpencodeClient({
     baseUrl: config.serverUrl,
     directory: defaultDirectory,
+    headers: authHeaders(config),
   });
 
   let connected = false;

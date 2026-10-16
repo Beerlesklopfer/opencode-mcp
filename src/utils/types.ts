@@ -21,6 +21,14 @@ export interface ServerConfig {
   httpPort?: number;
   /** Path to opencode.json config file for persisting settings */
   configPath?: string;
+  /** OpenCode server API generation: detect automatically, or force v1/v2 */
+  apiVersion?: 'auto' | 'v1' | 'v2';
+  /** Maximum time to wait for a prompt to finish in ms (v2) */
+  promptTimeout?: number;
+  /** OpenCode server password (HTTP basic auth) */
+  serverPassword?: string;
+  /** OpenCode server username (HTTP basic auth) */
+  serverUsername?: string;
 }
 
 export const DEFAULT_CONFIG: ServerConfig = {
@@ -28,6 +36,9 @@ export const DEFAULT_CONFIG: ServerConfig = {
   autoStart: true,
   timeout: 120000,
   transport: 'stdio',
+  apiVersion: 'auto',
+  promptTimeout: 1800000,
+  serverUsername: 'opencode',
 };
 
 // ============================================================================
@@ -218,6 +229,7 @@ export const ErrorCodes = {
   TOOL_EXECUTION_FAILED: 'TOOL_EXECUTION_FAILED',
   TIMEOUT: 'TIMEOUT',
   UNAUTHORIZED: 'UNAUTHORIZED',
+  NOT_SUPPORTED: 'NOT_SUPPORTED',
 } as const;
 
 export type ErrorCode = typeof ErrorCodes[keyof typeof ErrorCodes];

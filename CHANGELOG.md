@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - `MCP_HTTP_HOST` environment variable to set the HTTP bind address (default `127.0.0.1`).
+- OpenCode 2.x support via `@opencode/client`. The API generation is detected at startup; force it with `OPENCODE_API_VERSION=v1|v2`.
+- `OPENCODE_SERVER_PASSWORD`/`OPENCODE_SERVER_USERNAME` for password-protected OpenCode servers (v1 and v2), `OPENCODE_PROMPT_TIMEOUT` for long-running prompts.
+- `NOT_SUPPORTED` error code for tools without an OpenCode 2.x endpoint (text search, symbol search, runtime config updates).
 
 ### Changed
 - `GET /mcp` now responds `405` in stateless mode instead of opening an SSE stream that could never deliver messages.

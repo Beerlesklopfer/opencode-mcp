@@ -306,12 +306,32 @@ MCP_TRANSPORT=http MCP_HTTP_PORT=3000 npx @opencode-mcp/server
 | `OPENCODE_TIMEOUT` | `120000` | Request timeout in ms |
 | `OPENCODE_DEFAULT_PROJECT` | - | Default project directory (used when workingDirectory not specified) |
 | `OPENCODE_CONFIG_PATH` | auto-detected | Path to opencode.json for config persistence |
+| `OPENCODE_API_VERSION` | `auto` | OpenCode server API: `auto` (detect), `v1` or `v2` |
+| `OPENCODE_PROMPT_TIMEOUT` | `1800000` | Maximum time a prompt may run in ms (v2) |
+| `OPENCODE_SERVER_PASSWORD` | - | Password of a protected OpenCode server (HTTP basic auth); `OPENCODE_PASSWORD` also works |
+| `OPENCODE_SERVER_USERNAME` | `opencode` | Username for the OpenCode server |
 | `OPENCODE_LOG_LEVEL` | `info` | Log level (debug, info, warn, error, none) |
 | `OPENCODE_LOG_TIMESTAMP` | `false` | Include timestamps in logs |
 | `MCP_TRANSPORT` | `stdio` | Transport mode (stdio or http) |
 | `MCP_HTTP_PORT` | `3000` | HTTP port |
 | `MCP_HTTP_HOST` | `127.0.0.1` | HTTP bind address |
 | `MCP_CORS_ORIGINS` | `*` | CORS origins (comma-separated, restrict in production) |
+
+## OpenCode 2.x
+
+The server detects the OpenCode API generation at startup (`OPENCODE_API_VERSION=auto`) and talks to OpenCode 2.x through the official `@opencode/client`. Detection needs the OpenCode server to be reachable; if the MCP server may start first, set `OPENCODE_API_VERSION=v2` explicitly. Start the OpenCode server with a fixed password so the MCP server can authenticate:
+
+```bash
+OPENCODE_SERVER_PASSWORD=secret opencode serve --port 4096
+OPENCODE_SERVER_PASSWORD=secret MCP_TRANSPORT=http npx @opencode-mcp/server
+```
+
+Behaviour with OpenCode 2.x:
+
+- Prompts run until the session is idle (up to `OPENCODE_PROMPT_TIMEOUT`), then the last assistant reply is returned.
+- Nobody can answer permission requests or questions over MCP. They are rejected with feedback to the model, which continues without the action.
+- `noReply` adds the text as context for the next prompt without starting a turn.
+- Not available, because OpenCode 2.x has no endpoint for them: `opencode_file_search`, `opencode_find_symbols`, `opencode_config_update` and `opencode_model_configure` (edit `opencode.json` instead). These tools return a `NOT_SUPPORTED` error.
 
 ## Config Persistence
 

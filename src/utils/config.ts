@@ -50,6 +50,28 @@ export function loadConfig(): ServerConfig {
     config.configPath = process.env.OPENCODE_CONFIG_PATH;
   }
 
+  const apiVersion = process.env.OPENCODE_API_VERSION;
+  if (apiVersion === 'auto' || apiVersion === 'v1' || apiVersion === 'v2') {
+    config.apiVersion = apiVersion;
+  }
+
+  if (process.env.OPENCODE_PROMPT_TIMEOUT) {
+    const promptTimeout = parseInt(process.env.OPENCODE_PROMPT_TIMEOUT, 10);
+    if (!isNaN(promptTimeout)) {
+      config.promptTimeout = promptTimeout;
+    }
+  }
+
+  // Same variables the OpenCode CLI uses to reach a password-protected server
+  const password = process.env.OPENCODE_SERVER_PASSWORD ?? process.env.OPENCODE_PASSWORD;
+  if (password) {
+    config.serverPassword = password;
+  }
+
+  if (process.env.OPENCODE_SERVER_USERNAME) {
+    config.serverUsername = process.env.OPENCODE_SERVER_USERNAME;
+  }
+
   return config;
 }
 
